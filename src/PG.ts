@@ -8,18 +8,18 @@ type Tokener = (stream: StringStream, state: State) => string | null;
 
 interface State {
     tokenize?: Tokener;
-    chain?: string;
-    style?: string;
+    chain?: string[] | null;
+    style?: string | null;
     endstyle?: string;
-    tail?: string | RegExp;
+    tail?: string | RegExp | null;
     mode?: string;
-    string?: string;
+    string?: string | null;
     subblock?: boolean;
     stopeol?: boolean;
-    prevState?: State;
+    prevState?: State | null;
 }
 
-const PERL = {
+const PERL: Record<string, number | number[] | null> = {
     // null - magic touch
     // 1 - keyword
     // 2 - def
@@ -622,9 +622,9 @@ const eatSuffix = (stream: StringStream, c: number) => {
 const tokenChain = (
     stream: StringStream,
     state: State,
-    chain: string | (string | void)[] | void,
-    style?: string,
-    tail?: string | RegExp,
+    chain: string[],
+    style?: string | null,
+    tail?: string | RegExp | null,
     tokener?: Tokener
 ) => {
     // NOTE: chain.length > 2 is not working now (it's for s[...][...]geos;)
@@ -638,16 +638,16 @@ const tokenChain = (
         while ((c = stream.next())) {
             if (c === chain[i] && !e) {
                 if (chain[++i] !== undefined) {
-                    state.chain = chain[i];
+                    state.chain = [chain[i]];
                     state.style = style;
                     state.tail = tail;
                 } else if (tail) stream.eatWhile(tail);
                 state.tokenize = tokener || tokenPerl;
-                return style;
+                return style ?? null;
             }
             e = !e && c == '\\';
         }
-        return style;
+        return style ?? null;
     };
     return state.tokenize(stream, state);
 };
@@ -662,7 +662,13 @@ const tokenSOMETHING = (stream: StringStream, state: State, string: string) => {
 };
 
 // EV3 block formatting
-const tokenEV3 = (stream: StringStream, state: State, string: string, style: string, prevState?: State) => {
+const tokenEV3 = (
+    stream: StringStream,
+    state: State,
+    string?: string | null,
+    style?: string | null,
+    prevState?: State | null
+): string | null => {
     state.tokenize = (stream, state) => {
         if (
             stream.match(
@@ -676,10 +682,10 @@ const tokenEV3 = (stream: StringStream, state: State, string: string, style: str
                 state.tokenize = (stream, state) =>
                     tokenEV3(stream, state, prevState.string, prevState.style, prevState.prevState);
             }
-            if (string.includes('BOLD')) return `${PGstyle} strong`;
-            if (string.includes('ITALIC')) return `${PGstyle} emphasis`;
+            if (string?.includes('BOLD')) return `${PGstyle} strong`;
+            if (string?.includes('ITALIC')) return `${PGstyle} emphasis`;
             if (prevState.endstyle) return prevState.endstyle;
-            return style;
+            return style ?? null;
         } else {
             state.tokenize = (stream, state) => tokenEV3(stream, state, string, style, prevState);
         }
@@ -720,7 +726,7 @@ const tokenEV3 = (stream: StringStream, state: State, string: string, style: str
             if (stream.match(/^\w+/)) {
                 // Check for PG keywords
                 if (PGcmds.has(stream.current())) return PGkeyword;
-                else return style;
+                else return style ?? null;
             }
             if (stream.match(/^['"]/)) {
                 // Quotes
@@ -787,76 +793,88 @@ const tokenEV3 = (stream: StringStream, state: State, string: string, style: str
             return 'trailingspace';
         } else if (stream.match(/^[[\]\\ (){}$@%`]/)) {
             // Advance a single character if special
-            return style;
+            return style ?? null;
         } else {
             // Otherwise advance through all non special characters
             if (prevState && prevState.mode == 'cmd') {
                 // Only eat through words in perl code mode
-                if (stream.match(/\w+/)) return style;
+                if (stream.match(/\w+/)) return style ?? null;
                 else stream.next();
             } else {
                 stream.eatWhile(/[^[\]\\ (){}$@%`]/);
             }
         }
-        return style;
+        return style ?? null;
     };
-    return state.tokenize(stream, state);
+    return state.tokenize?.(stream, state) ?? null;
 };
 
 // No additional formatting inside comment block, only looks for end string.
 // Currently only used for comments and ``` code blocks.
 // The final stream.match and stream.eatWhile may need updated if used for other blocks.
-const tokenPGMLComment = (stream: StringStream, state: State, string: string, style?: string, prevState?: State) => {
+const tokenPGMLComment = (
+    stream: StringStream,
+    state: State,
+    string?: string | null,
+    style?: string | null,
+    prevState?: State | null
+) => {
     state.tokenize = (stream, state) => {
         if (stream.match(new RegExp(`^${string}`))) {
             state.tokenize = (stream, state) =>
-                tokenPGML(stream, state, prevState.string, prevState.style, prevState.prevState);
-            return style;
+                tokenPGML(stream, state, prevState?.string, prevState?.style, prevState?.prevState);
+            return style ?? null;
         } else {
             state.tokenize = (stream, state) => tokenPGMLComment(stream, state, string, style, prevState);
         }
-        if (stream.match(/^[\]%`]/)) return style;
+        if (stream.match(/^[\]%`]/)) return style ?? null;
         stream.eatWhile(/[^\]%`]/);
-        return style;
+        return style ?? null;
     };
     return state.tokenize(stream, state);
 };
 
 // PGML subblock which has limited formatting options compared to main block.
 // This block nests {} and [] blocks, for correct pairing in variables and commands.
-const tokenPGMLSubBlock = (stream: StringStream, state: State, string: string, style?: string, prevState?: State) => {
-    state.tokenize = (stream, state) => {
+const tokenPGMLSubBlock = (
+    stream: StringStream,
+    state: State,
+    string?: string | null,
+    style?: string | null,
+    prevState?: State | null
+) => {
+    state.tokenize = (stream, state): string | null => {
         if (stream.match(new RegExp(`^${string}`))) {
             // Needed to ensure ':   ' verbatim lines exit out if ended with a secondary subblock.
-            if (stream.eol() && prevState.subblock && prevState.prevState && prevState.prevState.stopeol) {
+            if (stream.eol() && prevState?.subblock && prevState.prevState && prevState.prevState.stopeol) {
                 state.tokenize = (stream, state) =>
                     tokenPGMLSubBlock(
                         stream,
                         state,
-                        prevState.prevState.string,
-                        prevState.prevState.style,
-                        prevState.prevState.prevState
+                        prevState.prevState?.string,
+                        prevState.prevState?.style,
+                        prevState.prevState?.prevState
                     );
-            } else if (stream.eol() && prevState.prevState && prevState.prevState.stopeol) {
+            } else if (stream.eol() && prevState?.prevState && prevState.prevState.stopeol) {
                 state.tokenize = (stream, state) =>
                     tokenPGML(
                         stream,
                         state,
-                        prevState.prevState.string,
-                        prevState.prevState.style,
-                        prevState.prevState.prevState
+                        prevState.prevState?.string,
+                        prevState.prevState?.style,
+                        prevState.prevState?.prevState
                     );
-            } else if (prevState.subblock) {
+            } else if (prevState?.subblock) {
                 state.tokenize = (stream, state) =>
                     tokenPGMLSubBlock(stream, state, prevState.string, prevState.style, prevState.prevState);
             } else {
                 state.tokenize = (stream, state) =>
-                    tokenPGML(stream, state, prevState.string, prevState.style, prevState.prevState);
+                    tokenPGML(stream, state, prevState?.string, prevState?.style, prevState?.prevState);
             }
-            if (prevState.mode == 'var' || prevState.mode == 'cmd') stream.match(/^\*{1,3}([^*]|$)/);
-            if (prevState.mode == 'calc' && !stream.match(/^\*(\s|$)/)) stream.match(/^\{.+\}/);
-            if (prevState.endstyle) return prevState.endstyle;
-            return style;
+            if (prevState?.mode == 'var' || prevState?.mode == 'cmd') stream.match(/^\*{1,3}([^*]|$)/);
+            if (prevState?.mode == 'calc' && !stream.match(/^\*(\s|$)/)) stream.match(/^\{.+\}/);
+            if (prevState?.endstyle) return prevState.endstyle;
+            return style ?? null;
         } else {
             state.tokenize = (stream, state) => tokenPGMLSubBlock(stream, state, string, style, prevState);
         }
@@ -867,9 +885,9 @@ const tokenPGMLSubBlock = (stream: StringStream, state: State, string: string, s
             string,
             subblock: true
         };
-        if (prevState.mode) newPrevState.mode = prevState.mode;
+        if (prevState?.mode) newPrevState.mode = prevState.mode;
 
-        if (prevState.mode == 'cmd') {
+        if (prevState?.mode == 'cmd') {
             // Some formatting for [@ ... @] blocks
             if (stream.match(/^[$@%]\w+/)) {
                 // $, @, % variables
@@ -896,7 +914,7 @@ const tokenPGMLSubBlock = (stream: StringStream, state: State, string: string, s
             if (stream.match(/^\w+/)) {
                 // Check for PG keywords
                 if (PGcmds.has(stream.current())) return PGkeyword;
-                else return style;
+                else return style ?? null;
             }
             if (stream.match(/^['"]/)) {
                 // Quotes
@@ -925,29 +943,35 @@ const tokenPGMLSubBlock = (stream: StringStream, state: State, string: string, s
             };
         } else if (stream.match(/^\[/)) {
             // Nested [ ] blocks
-            if (prevState.mode == 'cmd') newPrevState.endstyle = 'variable';
+            if (prevState?.mode == 'cmd') newPrevState.endstyle = 'variable';
             state.tokenize = (stream, state) => tokenPGMLSubBlock(stream, state, '\\]', style, newPrevState);
-            if (prevState.mode == 'cmd') return 'variable';
+            if (prevState?.mode == 'cmd') return 'variable';
         } else if (stream.match(/^\{/)) {
             // Nested { } blocks
-            if (prevState.mode == 'cmd') newPrevState.endstyle = 'variable';
+            if (prevState?.mode == 'cmd') newPrevState.endstyle = 'variable';
             state.tokenize = (stream, state) => tokenPGMLSubBlock(stream, state, '\\}', style, newPrevState);
-            if (prevState.mode == 'cmd') return 'variable';
+            if (prevState?.mode == 'cmd') return 'variable';
         } else if (stream.match(/^\w+\s*/)) {
             // Grab next word before going forward
-            return style;
+            return style ?? null;
         } else {
             // Catchall to advanced one character if no match was found.
             stream.eat(/./);
         }
-        return style;
+        return style ?? null;
     };
     return state.tokenize(stream, state);
 };
 
 // Main PGML block. Can nest to allow subblocks with PGML formatting in them.
-const tokenPGML = (stream: StringStream, state: State, string: string, style?: string, prevState?: State) => {
-    state.tokenize = (stream, state) => {
+const tokenPGML = (
+    stream: StringStream,
+    state: State,
+    string?: string | null,
+    style?: string | null,
+    prevState?: State | null
+) => {
+    state.tokenize = (stream, state): string | null => {
         if (stream.match(new RegExp(`^${string}`))) {
             if (!prevState) {
                 state.tokenize = tokenPerl;
@@ -958,15 +982,15 @@ const tokenPGML = (stream: StringStream, state: State, string: string, style?: s
                     tokenPGML(
                         stream,
                         state,
-                        prevState.prevState.string,
-                        prevState.prevState.style,
-                        prevState.prevState.prevState
+                        prevState.prevState?.string,
+                        prevState.prevState?.style,
+                        prevState.prevState?.prevState
                     );
             } else {
                 state.tokenize = (stream, state) =>
                     tokenPGML(stream, state, prevState.string, prevState.style, prevState.prevState);
             }
-            return style;
+            return style ?? null;
         } else {
             state.tokenize = (stream, state) => tokenPGML(stream, state, string, style, prevState);
         }
@@ -1089,12 +1113,12 @@ const tokenPGML = (stream: StringStream, state: State, string: string, style?: s
             return 'trailingspace';
         } else if (stream.match(/[A-Za-z0-9]+\s*/)) {
             // Grab next word before going forward
-            return style;
+            return style ?? null;
         } else {
             // Catchall to advanced one character if no match was found.
             stream.eat(/./);
         }
-        return style;
+        return style ?? null;
     };
 
     return state.tokenize(stream, state);
@@ -1176,7 +1200,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
                 }
                 if (/[\^'"!~/]/.test(c)) {
                     eatSuffix(stream, 1);
-                    return tokenChain(stream, state, [stream.eat(c)], RXstyle, RXmodifiers);
+                    return tokenChain(stream, state, [stream.eat(c) as string], RXstyle, RXmodifiers);
                 }
             } else if (c == 'q') {
                 c = look(stream, 1);
@@ -1198,7 +1222,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
                 }
                 if (/[\^'"!~/]/.test(c)) {
                     eatSuffix(stream, 1);
-                    return tokenChain(stream, state, [stream.eat(c)], 'string');
+                    return tokenChain(stream, state, [stream.eat(c) as string], 'string');
                 }
             } else if (c == 'w') {
                 c = look(stream, 1);
@@ -1220,7 +1244,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
                 }
                 if (/[\^'"!~/]/.test(c)) {
                     eatSuffix(stream, 1);
-                    return tokenChain(stream, state, [stream.eat(c)], 'bracket');
+                    return tokenChain(stream, state, [stream.eat(c) as string], 'bracket');
                 }
             } else if (c == 'r') {
                 c = look(stream, 1);
@@ -1242,7 +1266,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
                 }
                 if (/[\^'"!~/]/.test(c)) {
                     eatSuffix(stream, 1);
-                    return tokenChain(stream, state, [stream.eat(c)], RXstyle, RXmodifiers);
+                    return tokenChain(stream, state, [stream.eat(c) as string], RXstyle, RXmodifiers);
                 }
             } else if (/[\^'"!~/([{<]/.test(c)) {
                 if (c == '(') {
@@ -1262,7 +1286,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
                     return tokenChain(stream, state, ['>'], 'string');
                 }
                 if (/[\^'"!~/]/.test(c)) {
-                    return tokenChain(stream, state, [stream.eat(c)], 'string');
+                    return tokenChain(stream, state, [stream.eat(c) as string], 'string');
                 }
             }
         }
@@ -1403,7 +1427,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
             const isPG = PGcmds.has(stream.current());
             if (!c && !isPG) return 'meta';
             if (isPG) return PGkeyword;
-            if (c[1]) c = c[0];
+            if (c instanceof Array && c.length > 0) c = c[0];
             if (l != ':') {
                 if (c == 1) return 'keyword';
                 else if (c == 2) return 'def';
@@ -1421,7 +1445,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
         const isPG = PGcmds.has(stream.current());
         if (!c && !isPG) return 'meta';
         if (isPG) return PGkeyword;
-        if (c[1]) c = c[0];
+        if (c instanceof Array && c.length > 0) c = c[0];
         if (l != ':') {
             if (c == 1) return 'keyword';
             else if (c == 2) return 'def';
