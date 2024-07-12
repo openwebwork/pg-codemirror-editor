@@ -1,6 +1,6 @@
-import { createView, extensions } from './codemirror';
 import { EditorState } from '@codemirror/state';
-import './style.scss';
+import { createView, extensions } from 'src/codemirror';
+import 'src/style.scss';
 
 const codeMirrorElt = document.createElement('div');
 codeMirrorElt.id = 'codemirror-editor';
@@ -8,8 +8,8 @@ codeMirrorElt.classList.add('codemirror-editor');
 document.getElementById('main-content')?.append(codeMirrorElt);
 const view = createView(codeMirrorElt, (document.getElementById('problemSource') as HTMLInputElement)?.value ?? '');
 
-document.getElementById('load-file').addEventListener('click', () => {
-    const file = (document.getElementById('problemFile') as HTMLInputElement)?.files[0];
+document.getElementById('load-file')?.addEventListener('click', () => {
+    const file = (document.getElementById('problemFile') as HTMLInputElement)?.files?.[0];
     if (file) {
         const reader = new FileReader();
         reader.readAsText(file);

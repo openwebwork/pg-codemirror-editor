@@ -5,7 +5,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import stylistic from '@stylistic/eslint-plugin';
 
 export default [
-    { ignores: ['**/dist/*', '**/lib/*', 'server/src/perl/pg/*'] },
+    { ignores: ['**/dist/*'] },
     { files: ['**/*.{js,mjs,cjs,ts}'] },
     pluginJs.configs.recommended,
     ...tseslint.configs.recommended,

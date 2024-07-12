@@ -15,26 +15,21 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirro
 import {
     StreamLanguage,
     bracketMatching,
-    //defaultHighlightStyle,
     foldGutter,
     foldKeymap,
     indentOnInput,
     indentUnit
-    //syntaxHighlighting
 } from '@codemirror/language';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { lintKeymap } from '@codemirror/lint';
 
-//import { javascript } from '@codemirror/lang-javascript';
-//import { javascript } from '@codemirror/legacy-modes/mode/javascript';
+import { PG } from 'src/PG';
 //import { perl } from '@codemirror/legacy-modes/mode/perl';
-import { PG } from './PG';
 //import { perl } from '../lang-perl';
 
 import { vim } from '@replit/codemirror-vim';
 import { oneDark } from '@codemirror/theme-one-dark';
-//import { materialDark } from 'cm6-theme-material-dark';
 
 const extensions = [
     vim(),
@@ -49,7 +44,6 @@ const extensions = [
     indentUnit.of('    '),
     EditorState.tabSize.of(4),
     indentOnInput(),
-    //syntaxHighlighting(defaultHighlightStyle, { fallback: true }), // default theme syntax highlighting
     bracketMatching(),
     closeBrackets(),
     autocompletion(),
@@ -67,14 +61,9 @@ const extensions = [
         ...lintKeymap,
         indentWithTab
     ]),
-
-    //javascript(),
-    //StreamLanguage.define(javascript),
-    //StreamLanguage.define(perl),
     StreamLanguage.define(PG),
+    //StreamLanguage.define(perl),
     //perl(),
-
-    //materialDark,
     oneDark
 ];
 
