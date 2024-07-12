@@ -1,19 +1,15 @@
-/* eslint-env node */
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import ESLintPlugin from 'eslint-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import path from 'path';
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ESLintPlugin = require('eslint-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const path = require('path');
-/* eslint-enable @typescript-eslint/no-require-imports */
-
-module.exports = {
+export default {
     entry: {
-        main: path.resolve(__dirname, './src/app.ts')
+        main: path.resolve(import.meta.dirname, './src/app.ts')
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(import.meta.dirname, 'dist')
     },
     devServer: {
         static: './public'
@@ -23,7 +19,7 @@ module.exports = {
         modules: ['node_modules'],
         extensions: ['.ts', '.js'],
         mainFields: ['browser', 'module', 'main'],
-        alias: { src: path.resolve(__dirname, 'src') }
+        alias: { src: path.resolve(import.meta.dirname, 'src') }
     },
     module: {
         rules: [
@@ -59,7 +55,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, 'public/index.html'),
+            template: path.resolve(import.meta.dirname, 'public/index.html'),
             title: 'CodeMirror Playground',
             lang: 'en-US'
         }),
