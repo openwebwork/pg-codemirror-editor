@@ -25,7 +25,6 @@ import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { lintKeymap } from '@codemirror/lint';
 
 import { PG } from 'src/PG';
-//import { perl } from '@codemirror/legacy-modes/mode/perl';
 //import { perl } from '../lang-perl';
 
 import { vim } from '@replit/codemirror-vim';
@@ -62,7 +61,6 @@ const extensions = [
         indentWithTab
     ]),
     StreamLanguage.define(PG),
-    //StreamLanguage.define(perl),
     //perl(),
     oneDark
 ];

@@ -1,6 +1,5 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ESLintPlugin from 'eslint-webpack-plugin';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import path from 'path';
 
 export default {
@@ -9,11 +8,11 @@ export default {
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(import.meta.dirname, 'dist')
+        path: path.resolve(import.meta.dirname, 'dist'),
+        clean: true
     },
     devServer: {
         static: './public'
-        //open: true
     },
     resolve: {
         modules: ['node_modules'],
@@ -59,8 +58,7 @@ export default {
             title: 'CodeMirror Playground',
             lang: 'en-US'
         }),
-        new ESLintPlugin(),
-        new CleanWebpackPlugin()
+        new ESLintPlugin({ configType: 'flat' })
     ],
     performance: { hints: false }
 };
