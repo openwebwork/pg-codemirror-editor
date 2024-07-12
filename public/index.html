@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="<%= htmlWebpackPlugin.options.lang %>">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title><%= htmlWebpackPlugin.options.title %></title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+	</head>
+
+	<body>
+		<div id="main-content" class="container my-3">
+			<h1>CodeMirror Playground</h1>
+			<div class="input-group mb-3">
+				<button class="btn btn-primary" id="load-file" type="button">Load File</button>
+				<input type="file" name="problemFile" id="problemFile" class="form-control" accept=".pg">
+			</div>
+			<div><input type="hidden" name="problemSource" id="problemSource"></div>
+		</div>
+	</body>
+</html>

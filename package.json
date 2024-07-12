@@ -1,0 +1,42 @@
+{
+	"name": "codemirror-testing",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "webpack --mode development",
+		"serve": "webpack serve --mode development",
+		"build": "webpack --mode production"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@codemirror/lang-javascript": "^6.2.2",
+		"@codemirror/legacy-modes": "^6.4.0",
+		"@codemirror/theme-one-dark": "^6.1.2",
+		"@replit/codemirror-vim": "^6.2.1",
+		"cm6-theme-material-dark": "^0.2.0",
+		"codemirror": "^6.0.1"
+	},
+	"devDependencies": {
+		"@awmottaz/prettier-plugin-void-html": "^1.5.0",
+		"clean-webpack-plugin": "^4.0.0",
+		"css-loader": "^6.8.1",
+		"html-webpack-plugin": "^5.6.0",
+		"prettier": "^3.3.2",
+		"sass": "^1.77.8",
+		"sass-loader": "^14.2.1",
+		"style-loader": "^4.0.0",
+		"ts-loader": "^9.5.1",
+		"typescript": "^5.5.3",
+		"webpack": "^5.93.0",
+		"webpack-cli": "^5.1.4",
+		"webpack-dev-server": "^5.0.4"
+	},
+	"overrides": {
+		"@awmottaz/prettier-plugin-void-html": {
+			"prettier": ">=3.2.2"
+		}
+	}
+}
