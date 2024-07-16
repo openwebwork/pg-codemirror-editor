@@ -82,8 +82,7 @@ const PERL: Record<string, number | number[] | null> = {
     and: 4,
     or: 4,
     xor: 4,
-    // PERL predefined variables (I know, what this is a paranoid idea, but may be needed for people, who learn PERL,
-    // and for me as well, ...and may be for you?;)
+    // PERL predefined variables
     BEGIN: [5, 1],
     END: [5, 1],
     PRINT: [5, 1],
@@ -1165,7 +1164,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
     }
 
     const ch = stream.next();
-    if (ch == '"' || ch == "'") {
+    if (ch === '"' || ch === "'") {
         // NOTE: ' or " or <<'SOMETHING'\n...\nSOMETHING\n or <<"SOMETHING"\n...\nSOMETHING\n
         if (prefix(stream, 3) == '<<' + ch) {
             const p = stream.pos;
@@ -1176,7 +1175,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
         }
         return tokenChain(stream, state, [ch], 'string');
     }
-    if (ch == 'q') {
+    if (ch === 'q') {
         let c = look(stream, -2);
         if (!(c && /\w/.test(c))) {
             c = look(stream, 0);
@@ -1291,7 +1290,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
             }
         }
     }
-    if (ch == 'm') {
+    if (ch === 'm') {
         let c: string | void = look(stream, -2);
         if (!(c && /\w/.test(c))) {
             c = stream.eat(/[([{<^'"!~/]/);
@@ -1314,7 +1313,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
             }
         }
     }
-    if (ch == 's') {
+    if (ch === 's') {
         if (!/[/>\]})\w]/.test(look(stream, -2))) {
             const c = stream.eat(/[([{<^'"!~/]/);
             if (c) {
@@ -1326,7 +1325,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
             }
         }
     }
-    if (ch == 'y') {
+    if (ch === 'y') {
         if (!/[/>\]})\w]/.test(look(stream, -2))) {
             const c = stream.eat(/[([{<^'"!~/]/);
             if (c) {
@@ -1338,7 +1337,7 @@ const tokenPerl = (stream: StringStream, state: State) => {
             }
         }
     }
-    if (ch == 't') {
+    if (ch === 't') {
         if (!/[/>\]})\w]/.test(look(stream, -2))) {
             let c = stream.eat('r');
             if (c) {
@@ -1353,14 +1352,14 @@ const tokenPerl = (stream: StringStream, state: State) => {
             }
         }
     }
-    if (ch == '`') {
+    if (ch === '`') {
         return tokenChain(stream, state, [ch], 'builtin');
     }
-    if (ch == '/') {
+    if (ch === '/') {
         if (!/~\s*$/.test(prefix(stream))) return 'operator';
         else return tokenChain(stream, state, [ch], RXstyle, RXmodifiers);
     }
-    if (ch == '$') {
+    if (ch === '$') {
         const p = stream.pos;
         if (stream.eatWhile(/\w/) && PGvars.has(stream.current().substring(1))) return PGstyle;
         else stream.pos = p;
@@ -1385,20 +1384,20 @@ const tokenPerl = (stream: StringStream, state: State) => {
             else return 'variable';
         }
     }
-    if (ch == '#') {
+    if (ch === '#') {
         if (look(stream, -2) != '$') {
             stream.skipToEnd();
             return 'comment';
         }
     }
-    if (ch == '-' && look(stream, -2) != ' ' && stream.match(/>\w+/)) return 'variable';
+    if (ch === '-' && look(stream, -2) != ' ' && stream.match(/>\w+/)) return 'variable';
     if (typeof ch === 'string' && /[:+\-^*$&%@=<>!?|/~.]/.test(ch)) {
         const p = stream.pos;
         stream.eatWhile(/[:+\-^*$&%@=<>!?|/~.]/);
         if (PERL[stream.current()]) return 'operator';
         else stream.pos = p;
     }
-    if (ch == '_') {
+    if (ch === '_') {
         if (stream.pos == 1) {
             if (suffix(stream, 6) == '_END__') {
                 return tokenChain(stream, state, ['\0'], 'comment');
