@@ -9,6 +9,7 @@ import {
     rectangularSelection,
     crosshairCursor,
     highlightActiveLine,
+    highlightTrailingWhitespace,
     keymap
 } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
@@ -25,9 +26,12 @@ import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { lintKeymap } from '@codemirror/lint';
 
 import { PG } from 'src/PG';
-//import { perl } from '../lang-perl';
+//import { perl } from 'codemirror-lang-perl';
+//import { pg } from 'codemirror-lang-pg';
 
 import { vim } from '@replit/codemirror-vim';
+
+//import { lightTheme } from './light-theme';
 import { oneDark } from '@codemirror/theme-one-dark';
 
 const extensions = [
@@ -49,6 +53,7 @@ const extensions = [
     rectangularSelection(),
     crosshairCursor(),
     highlightActiveLine(),
+    highlightTrailingWhitespace(),
     highlightSelectionMatches(),
     keymap.of([
         ...closeBracketsKeymap,
@@ -62,6 +67,8 @@ const extensions = [
     ]),
     StreamLanguage.define(PG),
     //perl(),
+    //pg(),
+    //lightTheme
     oneDark
 ];
 
