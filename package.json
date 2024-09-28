@@ -1,18 +1,26 @@
 {
-    "name": "codemirror-testing",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "name": "pg-codemirror-editor",
+    "version": "0.0.1",
+    "description": "PG CodeMirror Editor",
+    "author": "Glenn Rice <grice1@missouriwestern.edu>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/openwebwork/pg-codemirror-editor.git"
+    },
+    "homepage": "https://github.com/openwebwork/pg-codemirror-editor",
+    "main": "main.js",
+    "keywords": [],
     "scripts": {
-        "format:prettier": "prettier --write .",
-        "lint:eslint": "eslint . --fix",
-        "dev": "webpack --mode development",
+        "format": "prettier --write .",
+        "lint": "eslint . --fix",
+        "build:dev": "webpack --mode development",
         "serve": "webpack serve --mode development",
         "build": "webpack --mode production"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "sideEffects": [
+        "*.scss"
+    ],
     "dependencies": {
         "@codemirror/theme-one-dark": "^6.1.2",
         "@replit/codemirror-vim": "^6.2.1",

@@ -10,12 +10,13 @@
 
     <body>
         <div id="main-content" class="container my-3">
-            <h1>CodeMirror Playground</h1>
+            <h1>PG CodeMirror Editor Playground</h1>
             <div class="input-group mb-3">
                 <button class="btn btn-primary" id="load-file" type="button">Load File</button>
-                <input type="file" name="problemFile" id="problemFile" class="form-control" accept=".pg">
+                <input type="file" name="problem-file" class="form-control" accept=".pg">
             </div>
-            <div><input type="hidden" name="problemSource" id="problemSource"></div>
+            <input type="hidden" name="editor-source">
+            <div class="pg-codemirror-editor"></div>
         </div>
     </body>
 </html>

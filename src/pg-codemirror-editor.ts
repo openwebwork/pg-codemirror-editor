@@ -13,26 +13,14 @@ import {
     keymap
 } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-import {
-    StreamLanguage,
-    bracketMatching,
-    foldGutter,
-    foldKeymap,
-    indentOnInput,
-    indentUnit
-} from '@codemirror/language';
+import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit } from '@codemirror/language';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { lintKeymap } from '@codemirror/lint';
-
-import { PG } from 'src/PG';
-//import { perl } from 'codemirror-lang-perl';
-//import { pg } from 'codemirror-lang-pg';
-
 import { vim } from '@replit/codemirror-vim';
-
-//import { lightTheme } from './light-theme';
 import { oneDark } from '@codemirror/theme-one-dark';
+//import { lightTheme } from './light-theme';
+import { pg } from 'codemirror-lang-pg';
 
 const extensions = [
     vim(),
@@ -65,15 +53,32 @@ const extensions = [
         ...lintKeymap,
         indentWithTab
     ]),
-    StreamLanguage.define(PG),
-    //perl(),
-    //pg(),
+    pg(),
     //lightTheme
     oneDark
 ];
 
-const createView = (elt: HTMLElement, doc = '') => {
-    return new EditorView({ state: EditorState.create({ extensions, doc }), parent: elt });
-};
+export interface InitializationOptions {
+    source?: string;
+}
 
-export { extensions, createView };
+export class PGCodeMirrorEditor {
+    private source = '';
+    private view: EditorView;
+
+    constructor(
+        private element: HTMLElement,
+        options?: InitializationOptions
+    ) {
+        if (options?.source) this.source = options.source;
+        this.view = new EditorView({
+            state: EditorState.create({ extensions, doc: this.source }),
+            parent: this.element
+        });
+    }
+
+    setSource(source: string) {
+        this.source = source;
+        this.view.setState(EditorState.create({ doc: this.source, extensions }));
+    }
+}

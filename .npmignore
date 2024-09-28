@@ -1,0 +1,10 @@
+/src
+/node_modules
+webpack.config.mjs
+tsconfig.json
+.vim
+.editorconfig
+.prettierrc
+eslint.config.mjs
+generate-parser.js
+.mocharc.cjs
