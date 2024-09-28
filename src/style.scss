@@ -8,6 +8,10 @@ h1 {
     resize: vertical;
 
     .cm-editor {
-        min-height: 400px;
+        .cm-scroller {
+            .cm-content {
+                min-height: 400px;
+            }
+        }
     }
 }
