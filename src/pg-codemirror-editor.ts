@@ -201,9 +201,9 @@ export class PGCodeMirrorEditor {
                 directionToggleLabel.setAttribute('for', 'pg-cm-direction-toggle');
                 directionToggleLabel.textContent = 'Force editor to RTL';
                 directionToggle.addEventListener('change', () => {
-                    const content = view.dom.querySelector('.cm-content');
-                    if (!content) return;
-                    (content as HTMLElement).style.direction = directionToggle.checked ? 'rtl' : 'ltr';
+                    const scroller = view.dom.querySelector('.cm-scroller');
+                    if (!scroller) return;
+                    (scroller as HTMLElement).style.direction = directionToggle.checked ? 'rtl' : 'ltr';
                 });
                 directionDiv.append(directionToggle, directionToggleLabel);
                 dom.append(directionDiv);
