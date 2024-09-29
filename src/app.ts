@@ -19,6 +19,12 @@ if (codeMirrorElt instanceof HTMLElement) {
     });
 
     document.getElementById('get-source')?.addEventListener('click', () => {
-        console.log(pgEditor.source);
+        const element = document.createElement('a');
+        element.href = `data:text/plain;charset=utf-8,${encodeURIComponent(pgEditor.source)}`;
+        element.download = 'contents.pg';
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     });
 }
