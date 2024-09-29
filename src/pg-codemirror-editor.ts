@@ -49,7 +49,6 @@ export interface InitializationOptions {
 }
 
 export class PGCodeMirrorEditor {
-    private source = '';
     private view: EditorView;
 
     private extensions = [
@@ -129,7 +128,7 @@ export class PGCodeMirrorEditor {
         private element: HTMLElement,
         options?: InitializationOptions
     ) {
-        this.source = options?.source ?? '';
+        const doc = options?.source ?? '';
 
         const selectedKeyMap = localStorage.getItem('pg-cm-editor.key-map') ?? options?.keyMap ?? 'Default';
         const keyMap = this.keyMaps.get(selectedKeyMap);
@@ -214,14 +213,17 @@ export class PGCodeMirrorEditor {
         );
 
         this.view = new EditorView({
-            state: EditorState.create({ doc: this.source, extensions: this.extensions }),
+            state: EditorState.create({ doc, extensions: this.extensions }),
             parent: this.element
         });
     }
 
-    setSource(source: string) {
-        this.source = source;
-        this.view.setState(EditorState.create({ doc: this.source, extensions: this.extensions }));
+    set source(doc: string) {
+        this.view.setState(EditorState.create({ doc, extensions: this.extensions }));
+    }
+
+    get source() {
+        return this.view.state.doc.toString();
     }
 
     get availableThemes() {

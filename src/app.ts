@@ -13,8 +13,12 @@ if (codeMirrorElt instanceof HTMLElement) {
             reader.readAsText(file);
             reader.addEventListener('load', () => {
                 sourceInput.value = reader.result as string;
-                pgEditor.setSource(sourceInput.value);
+                pgEditor.source = sourceInput.value;
             });
         }
+    });
+
+    document.getElementById('get-source')?.addEventListener('click', () => {
+        console.log(pgEditor.source);
     });
 }
