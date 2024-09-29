@@ -93,22 +93,14 @@ export class PGCodeMirrorEditor {
     ]);
 
     private theme = new Compartment();
-    private selectedTheme = 'Light';
+    private selectedTheme = 'Default Light';
     private themes = new Map<string, Extension>([
         ['Default Light', lightTheme],
-        ['One Dark', oneDark],
-        ['Basic Dark', basicDark],
-        ['Basic Light', basicLight],
-        ['Gruvbox Dark', gruvboxDark],
-        ['Gruvbox Light', gruvboxLight],
-        ['Material Dark', materialDark],
-        ['Nord', nord],
-        ['Solarized Dark', solarizedDark],
-        ['Solarized Light', solarizedLight],
-        ['Amy', themeMirrorThemes.amy],
         ['Amy', themeMirrorThemes.amy],
         ['Ayu Light', themeMirrorThemes.ayuLight],
         ['Barf', themeMirrorThemes.barf],
+        ['Basic Dark', basicDark],
+        ['Basic Light', basicLight],
         ['Bespin', themeMirrorThemes.bespin],
         ['Birds of Paradise', themeMirrorThemes.birdsOfParadise],
         ['Boys and Girls', themeMirrorThemes.boysAndGirls],
@@ -117,9 +109,16 @@ export class PGCodeMirrorEditor {
         ['Cool Glow', themeMirrorThemes.coolGlow],
         ['Dracula', themeMirrorThemes.dracula],
         ['Espresso', themeMirrorThemes.espresso],
+        ['Gruvbox Dark', gruvboxDark],
+        ['Gruvbox Light', gruvboxLight],
+        ['Material Dark', materialDark],
         ['Noctis Lilac', themeMirrorThemes.noctisLilac],
+        ['Nord', nord],
+        ['One Dark', oneDark],
         ['Rose Pine Dawn', themeMirrorThemes.rosePineDawn],
         ['Smoothy', themeMirrorThemes.smoothy],
+        ['Solarized Dark', solarizedDark],
+        ['Solarized Light', solarizedLight],
         ['Solarized Light 2', themeMirrorThemes.solarizedLight],
         ['Tomorrow', themeMirrorThemes.tomorrow]
     ]);
@@ -139,7 +138,7 @@ export class PGCodeMirrorEditor {
             this.extensions.unshift(this.keyMap.of(keyMap));
         } else this.extensions.unshift(this.keyMap.of([]));
 
-        const selectedTheme = localStorage.getItem('pg-cm-editor.theme') ?? options?.theme ?? 'Light';
+        const selectedTheme = localStorage.getItem('pg-cm-editor.theme') ?? options?.theme ?? 'Default Light';
         const theme = this.themes.get(selectedTheme);
         if (theme) {
             this.selectedTheme = selectedTheme;
