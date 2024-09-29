@@ -149,7 +149,7 @@ export class PGCodeMirrorEditor {
         this.extensions.push(this.language.of(pg()));
 
         this.extensions.push(
-            showPanel.of((): Panel => {
+            showPanel.of((view: EditorView): Panel => {
                 const dom = document.createElement('div');
                 dom.classList.add('pg-cm-toolbar');
 
@@ -192,6 +192,23 @@ export class PGCodeMirrorEditor {
                 });
                 keyMapChangerDiv.append(keyMapChangerLabel, keyMapChanger);
                 dom.append(keyMapChangerDiv);
+
+                const directionDiv = document.createElement('div');
+                directionDiv.classList.add('pg-cm-toolbar-item');
+                const directionToggle = document.createElement('input');
+                directionToggle.name = 'pg-cm-direction-toggle';
+                directionToggle.type = 'checkbox';
+                directionToggle.id = 'pg-cm-direction-toggle';
+                const directionToggleLabel = document.createElement('label');
+                directionToggleLabel.setAttribute('for', 'pg-cm-direction-toggle');
+                directionToggleLabel.textContent = 'Force editor to RTL';
+                directionToggle.addEventListener('change', () => {
+                    const content = view.dom.querySelector('.cm-content');
+                    if (!content) return;
+                    (content as HTMLElement).style.direction = directionToggle.checked ? 'rtl' : 'ltr';
+                });
+                directionDiv.append(directionToggle, directionToggleLabel);
+                dom.append(directionDiv);
 
                 return { dom };
             })
