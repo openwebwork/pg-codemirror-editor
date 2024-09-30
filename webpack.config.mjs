@@ -8,6 +8,7 @@ export default {
     },
     output: {
         filename: '[name].js',
+        chunkFilename: '[name].[contenthash].js',
         path: path.resolve(import.meta.dirname, 'dist'),
         clean: true
     },
@@ -62,5 +63,11 @@ export default {
         }),
         new ESLintPlugin({ configType: 'flat' })
     ],
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: { defaultVendors: false }
+        }
+    },
     performance: { hints: false }
 };

@@ -22,24 +22,7 @@ import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { lintKeymap } from '@codemirror/lint';
 import 'src/pg-codemirror-editor.scss';
 
-// Key bindings
-import { emacs } from '@replit/codemirror-emacs';
-import { vim } from '@replit/codemirror-vim';
-
-// Themes
-import { oneDark } from '@codemirror/theme-one-dark';
 import { lightTheme } from 'src/light-theme';
-import { basicDark } from 'cm6-theme-basic-dark';
-import { basicLight } from 'cm6-theme-basic-light';
-import { gruvboxDark } from 'cm6-theme-gruvbox-dark';
-import { gruvboxLight } from 'cm6-theme-gruvbox-light';
-import { materialDark } from 'cm6-theme-material-dark';
-import { nord } from 'cm6-theme-nord';
-import { solarizedDark } from 'cm6-theme-solarized-dark';
-import { solarizedLight } from 'cm6-theme-solarized-light';
-import * as themeMirrorThemes from 'thememirror';
-
-// Languages
 import { pg } from 'codemirror-lang-pg';
 
 export interface InitializationOptions {
@@ -49,9 +32,20 @@ export interface InitializationOptions {
 }
 
 export class PGCodeMirrorEditor {
+    private static instanceCount = 0;
+
     private view: EditorView;
+    private instance: number;
+
+    private keyMapSelect?: HTMLSelectElement;
+    private themeSelect?: HTMLSelectElement;
+
+    private keyMap = new Compartment();
+    private theme = new Compartment();
+    private language = new Compartment();
 
     private extensions = [
+        this.keyMap.of([]),
         lineNumbers(),
         highlightActiveLineGutter(),
         highlightSpecialChars(),
@@ -80,125 +74,146 @@ export class PGCodeMirrorEditor {
             ...completionKeymap,
             ...lintKeymap,
             indentWithTab
-        ])
+        ]),
+        this.theme.of(lightTheme),
+        this.language.of(pg())
     ];
 
-    private keyMap = new Compartment();
-    private selectedKeyMap = 'Default';
-    private keyMaps = new Map<string, Extension>([
+    private currentKeyMap = 'Default';
+    private keyMaps = new Map<string, Extension | (() => Promise<Extension>)>([
         ['Default', []],
-        ['Emacs', emacs()],
-        ['Vim', vim()]
+        ['Emacs', async () => (await import(/* webpackChunkName: 'emacs' */ '@replit/codemirror-emacs')).emacs()],
+        ['Vim', async () => (await import(/* webpackChunkName: 'vim' */ '@replit/codemirror-vim')).vim()]
     ]);
 
-    private theme = new Compartment();
-    private selectedTheme = 'Default Light';
-    private themes = new Map<string, Extension>([
-        ['Default Light', lightTheme],
-        ['Amy', themeMirrorThemes.amy],
-        ['Ayu Light', themeMirrorThemes.ayuLight],
-        ['Barf', themeMirrorThemes.barf],
-        ['Basic Dark', basicDark],
-        ['Basic Light', basicLight],
-        ['Bespin', themeMirrorThemes.bespin],
-        ['Birds of Paradise', themeMirrorThemes.birdsOfParadise],
-        ['Boys and Girls', themeMirrorThemes.boysAndGirls],
-        ['Clouds', themeMirrorThemes.clouds],
-        ['Cobalt', themeMirrorThemes.cobalt],
-        ['Cool Glow', themeMirrorThemes.coolGlow],
-        ['Dracula', themeMirrorThemes.dracula],
-        ['Espresso', themeMirrorThemes.espresso],
-        ['Gruvbox Dark', gruvboxDark],
-        ['Gruvbox Light', gruvboxLight],
-        ['Material Dark', materialDark],
-        ['Noctis Lilac', themeMirrorThemes.noctisLilac],
-        ['Nord', nord],
-        ['One Dark', oneDark],
-        ['Rose Pine Dawn', themeMirrorThemes.rosePineDawn],
-        ['Smoothy', themeMirrorThemes.smoothy],
-        ['Solarized Dark', solarizedDark],
-        ['Solarized Light', solarizedLight],
-        ['Solarized Light 2', themeMirrorThemes.solarizedLight],
-        ['Tomorrow', themeMirrorThemes.tomorrow]
+    private currentTheme = 'Default';
+    private themes = new Map<string, Extension | (() => Promise<Extension>)>([
+        ['Default', lightTheme],
+        ['Amy', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).amy],
+        ['Ayu Light', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).ayuLight],
+        ['Barf', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).barf],
+        [
+            'Basic Dark',
+            async () => (await import(/* webpackChunkName: 'basic-dark' */ 'cm6-theme-basic-dark')).basicDark
+        ],
+        [
+            'Basic Light',
+            async () => (await import(/* webpackChunkName: 'basic-light' */ 'cm6-theme-basic-light')).basicLight
+        ],
+        ['Bespin', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).bespin],
+        [
+            'Birds of Paradise',
+            async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).birdsOfParadise
+        ],
+        [
+            'Boys and Girls',
+            async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).boysAndGirls
+        ],
+        ['Clouds', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).clouds],
+        ['Cobalt', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).cobalt],
+        ['Cool Glow', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).coolGlow],
+        ['Dracula', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).dracula],
+        ['Espresso', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).espresso],
+        [
+            'Gruvbox Dark',
+            async () => (await import(/* webpackChunkName: 'gruvbox-dark' */ 'cm6-theme-gruvbox-dark')).gruvboxDark
+        ],
+        [
+            'Gruvbox Light',
+            async () => (await import(/* webpackChunkName: 'gruvgox-light' */ 'cm6-theme-gruvbox-light')).gruvboxLight
+        ],
+        [
+            'Material Dark',
+            async () => (await import(/* webpackChunkName: 'material-dark' */ 'cm6-theme-material-dark')).materialDark
+        ],
+        ['Noctis Lilac', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).noctisLilac],
+        ['Nord', async () => (await import(/* webpackChunkName: 'nord' */ 'cm6-theme-nord')).nord],
+        [
+            'One Dark',
+            async () => (await import(/* webpackChunkName: 'one-dark' */ '@codemirror/theme-one-dark')).oneDark
+        ],
+        [
+            'Rose Pine Dawn',
+            async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).rosePineDawn
+        ],
+        ['Smoothy', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).smoothy],
+        [
+            'Solarized Dark',
+            async () =>
+                (await import(/* webpackChunkName: 'solarized-dark' */ 'cm6-theme-solarized-dark')).solarizedDark
+        ],
+        [
+            'Solarized Light',
+            async () =>
+                (await import(/* webpackChunkName: 'solarized-light' */ 'cm6-theme-solarized-light')).solarizedLight
+        ],
+        [
+            'Solarized Light 2',
+            async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).solarizedLight
+        ],
+        ['Tomorrow', async () => (await import(/* webpackChunkName: 'thememirror' */ 'thememirror')).tomorrow]
     ]);
-
-    private language = new Compartment();
 
     constructor(
         private element: HTMLElement,
         options?: InitializationOptions
     ) {
+        this.instance = ++PGCodeMirrorEditor.instanceCount;
         const doc = options?.source ?? '';
-
-        const selectedKeyMap = localStorage.getItem('pg-cm-editor.key-map') ?? options?.keyMap ?? 'Default';
-        const keyMap = this.keyMaps.get(selectedKeyMap);
-        if (keyMap) {
-            this.selectedKeyMap = selectedKeyMap;
-            this.extensions.unshift(this.keyMap.of(keyMap));
-        } else this.extensions.unshift(this.keyMap.of([]));
-
-        const selectedTheme = localStorage.getItem('pg-cm-editor.theme') ?? options?.theme ?? 'Default Light';
-        const theme = this.themes.get(selectedTheme);
-        if (theme) {
-            this.selectedTheme = selectedTheme;
-            this.extensions.push(this.theme.of(theme));
-        } else this.extensions.push(this.theme.of(lightTheme));
-
-        this.extensions.push(this.language.of(pg()));
 
         this.extensions.push(
             showPanel.of((view: EditorView): Panel => {
                 const dom = document.createElement('div');
                 dom.classList.add('pg-cm-toolbar');
 
-                const themeChangerDiv = document.createElement('div');
-                themeChangerDiv.classList.add('pg-cm-toolbar-item');
-                const themeChanger = document.createElement('select');
-                themeChanger.id = 'pg-cm-theme-changer';
-                const themeChangerLabel = document.createElement('label');
-                themeChangerLabel.textContent = 'Theme: ';
-                themeChangerLabel.setAttribute('for', 'pg-cm-theme-changer');
+                const themeDiv = document.createElement('div');
+                themeDiv.classList.add('pg-cm-toolbar-item');
+                this.themeSelect = document.createElement('select');
+                this.themeSelect.id = 'pg-cm-theme-changer';
+                const themeLabel = document.createElement('label');
+                themeLabel.textContent = 'Theme: ';
+                themeLabel.setAttribute('for', 'pg-cm-theme-changer');
                 for (const theme of this.themes.keys()) {
                     const option = document.createElement('option');
                     option.value = theme;
                     option.textContent = theme;
-                    if (option.value === this.selectedTheme) option.selected = true;
-                    themeChanger.append(option);
+                    if (option.value === this.currentTheme) option.selected = true;
+                    this.themeSelect.append(option);
                 }
-                themeChanger.addEventListener('change', () => {
-                    this.changeTheme(themeChanger.value);
+                this.themeSelect.addEventListener('change', () => {
+                    if (this.themeSelect) void this.setTheme(this.themeSelect.value);
                 });
-                themeChangerDiv.append(themeChangerLabel, themeChanger);
-                dom.append(themeChangerDiv);
+                themeDiv.append(themeLabel, this.themeSelect);
+                dom.append(themeDiv);
 
-                const keyMapChangerDiv = document.createElement('div');
-                keyMapChangerDiv.classList.add('pg-cm-toolbar-item');
-                const keyMapChanger = document.createElement('select');
-                keyMapChanger.id = 'pg-cm-key-map-changer';
-                const keyMapChangerLabel = document.createElement('label');
-                keyMapChangerLabel.textContent = 'Key Map: ';
-                keyMapChangerLabel.setAttribute('for', 'pg-cm-key-map-changer');
+                const keyMapDiv = document.createElement('div');
+                keyMapDiv.classList.add('pg-cm-toolbar-item');
+                this.keyMapSelect = document.createElement('select');
+                this.keyMapSelect.id = `pg-cm-key-map-changer-${this.instance.toString()}`;
+                const keyMapLabel = document.createElement('label');
+                keyMapLabel.textContent = 'Key Map: ';
+                keyMapLabel.setAttribute('for', this.keyMapSelect.id);
                 for (const keyMap of this.keyMaps.keys()) {
                     const option = document.createElement('option');
                     option.value = keyMap;
                     option.textContent = keyMap;
-                    if (option.value === this.selectedKeyMap) option.selected = true;
-                    keyMapChanger.append(option);
+                    if (option.value === this.currentKeyMap) option.selected = true;
+                    this.keyMapSelect.append(option);
                 }
-                keyMapChanger.addEventListener('change', () => {
-                    this.changeKeyMap(keyMapChanger.value);
+                this.keyMapSelect.addEventListener('change', () => {
+                    if (this.keyMapSelect) void this.setKeyMap(this.keyMapSelect.value);
                 });
-                keyMapChangerDiv.append(keyMapChangerLabel, keyMapChanger);
-                dom.append(keyMapChangerDiv);
+                keyMapDiv.append(keyMapLabel, this.keyMapSelect);
+                dom.append(keyMapDiv);
 
                 const directionDiv = document.createElement('div');
                 directionDiv.classList.add('pg-cm-toolbar-item');
                 const directionToggle = document.createElement('input');
                 directionToggle.name = 'pg-cm-direction-toggle';
                 directionToggle.type = 'checkbox';
-                directionToggle.id = 'pg-cm-direction-toggle';
+                directionToggle.id = `pg-cm-direction-toggle-${this.instance.toString()}`;
                 const directionToggleLabel = document.createElement('label');
-                directionToggleLabel.setAttribute('for', 'pg-cm-direction-toggle');
+                directionToggleLabel.setAttribute('for', directionToggle.id);
                 directionToggleLabel.textContent = 'Force editor to RTL';
                 directionToggle.addEventListener('change', () => {
                     const scroller = view.dom.querySelector('.cm-scroller');
@@ -216,39 +231,44 @@ export class PGCodeMirrorEditor {
             state: EditorState.create({ doc, extensions: this.extensions }),
             parent: this.element
         });
+
+        const selectedKeyMap = localStorage.getItem('pg-cm-editor.key-map') ?? options?.keyMap ?? 'Default';
+        if (selectedKeyMap !== 'Default') void this.setKeyMap(selectedKeyMap);
+        const selectedTheme = localStorage.getItem('pg-cm-editor.theme') ?? options?.theme ?? 'Default';
+        if (selectedTheme !== 'Default') void this.setTheme(selectedTheme);
     }
 
     set source(doc: string) {
         this.view.setState(EditorState.create({ doc, extensions: this.extensions }));
+        void this.setTheme(this.currentTheme);
+        void this.setKeyMap(this.currentKeyMap);
     }
 
     get source() {
         return this.view.state.doc.toString();
     }
 
-    get availableThemes() {
-        return this.themes.keys();
-    }
-
-    changeTheme(themeName: string) {
+    async setTheme(themeName: string) {
         const theme = this.themes.get(themeName);
         if (theme) {
-            this.selectedTheme = themeName;
+            this.currentTheme = themeName;
             localStorage.setItem('pg-cm-editor.theme', themeName);
-            this.view.dispatch({ effects: this.theme.reconfigure(theme) });
+            if (this.themeSelect) this.themeSelect.value = themeName;
+            this.view.dispatch({
+                effects: this.theme.reconfigure(typeof theme === 'function' ? await theme() : theme)
+            });
         }
     }
 
-    get availableKeyMaps() {
-        return this.keyMaps.keys();
-    }
-
-    changeKeyMap(keyMapName: string) {
+    async setKeyMap(keyMapName: string) {
         const keyMap = this.keyMaps.get(keyMapName);
         if (keyMap) {
-            this.selectedKeyMap = keyMapName;
+            this.currentKeyMap = keyMapName;
             localStorage.setItem('pg-cm-editor.key-map', keyMapName);
-            this.view.dispatch({ effects: this.keyMap.reconfigure(keyMap) });
+            if (this.keyMapSelect) this.keyMapSelect.value = keyMapName;
+            this.view.dispatch({
+                effects: this.keyMap.reconfigure(typeof keyMap === 'function' ? await keyMap() : keyMap)
+            });
         }
     }
 }
