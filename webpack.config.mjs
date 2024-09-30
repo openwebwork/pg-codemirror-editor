@@ -8,7 +8,7 @@ export default {
     },
     output: {
         filename: '[name].js',
-        chunkFilename: '[name].[contenthash].js',
+        chunkFilename: 'extensions/[name].[contenthash].js',
         path: path.resolve(import.meta.dirname, 'dist'),
         clean: true
     },
