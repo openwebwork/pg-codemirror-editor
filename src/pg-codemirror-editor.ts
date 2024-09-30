@@ -30,7 +30,7 @@ export interface InitializationOptions {
     keyMap?: string;
 }
 
-export class PGCodeMirrorEditor {
+export class View {
     private static instanceCount = 0;
 
     private view: EditorView;
@@ -163,7 +163,7 @@ export class PGCodeMirrorEditor {
         private element: HTMLElement,
         options?: InitializationOptions
     ) {
-        this.instance = ++PGCodeMirrorEditor.instanceCount;
+        this.instance = ++View.instanceCount;
         const doc = options?.source ?? '';
 
         this.extensions.push(

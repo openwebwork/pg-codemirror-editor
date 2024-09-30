@@ -1,0 +1,13 @@
+h1 {
+    color: purple;
+}
+
+.pg-codemirror-editor {
+    border: 1px solid black;
+    min-height: 400px;
+    resize: vertical;
+}
+
+.pg-codemirror-editor .cm-editor .cm-scroller .cm-content {
+    min-height: 400px;
+}
