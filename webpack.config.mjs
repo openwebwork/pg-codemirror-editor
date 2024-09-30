@@ -66,7 +66,14 @@ export default {
     optimization: {
         splitChunks: {
             chunks: 'all',
-            cacheGroups: { defaultVendors: false }
+            cacheGroups: {
+                defaultVendors: false,
+                '@lezer/lr': {
+                    test: /[\\/]node_modules[\\/]@lezer\/lr[\\/]/,
+                    name: 'lezer-lr',
+                    reuseExistingChunk: true
+                }
+            }
         }
     },
     performance: { hints: false }
