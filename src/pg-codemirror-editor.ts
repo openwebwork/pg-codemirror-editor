@@ -20,12 +20,11 @@ import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit } fr
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { lintKeymap } from '@codemirror/lint';
+import { lightTheme } from 'src/light-theme';
 import 'src/pg-codemirror-editor.scss';
 
-import { lightTheme } from 'src/light-theme';
-import { pg } from 'codemirror-lang-pg';
-
 export interface InitializationOptions {
+    language?: string;
     source?: string;
     theme?: string;
     keyMap?: string;
@@ -76,8 +75,14 @@ export class PGCodeMirrorEditor {
             indentWithTab
         ]),
         this.theme.of(lightTheme),
-        this.language.of(pg())
+        this.language.of([])
     ];
+
+    private currentLanguage = 'pg';
+    private languages = new Map<string, () => Promise<Extension>>([
+        ['pg', async () => (await import(/* webpackChunkName: 'pg' */ 'codemirror-lang-pg')).pg()],
+        ['html', async () => (await import(/* webpackChunkName: 'html' */ '@codemirror/lang-html')).html()]
+    ]);
 
     private currentKeyMap = 'Default';
     private keyMaps = new Map<string, Extension | (() => Promise<Extension>)>([
@@ -232,6 +237,9 @@ export class PGCodeMirrorEditor {
             parent: this.element
         });
 
+        const selectedLanguage = options?.language ?? 'pg';
+        void this.setLanguage(selectedLanguage);
+
         const selectedKeyMap = localStorage.getItem('pg-cm-editor.key-map') ?? options?.keyMap ?? 'Default';
         if (selectedKeyMap !== 'Default') void this.setKeyMap(selectedKeyMap);
         const selectedTheme = localStorage.getItem('pg-cm-editor.theme') ?? options?.theme ?? 'Default';
@@ -240,12 +248,21 @@ export class PGCodeMirrorEditor {
 
     set source(doc: string) {
         this.view.setState(EditorState.create({ doc, extensions: this.extensions }));
+        void this.setLanguage(this.currentLanguage);
         void this.setTheme(this.currentTheme);
         void this.setKeyMap(this.currentKeyMap);
     }
 
     get source() {
         return this.view.state.doc.toString();
+    }
+
+    async setLanguage(languageName: string) {
+        const language = this.languages.get(languageName);
+        if (language) {
+            this.currentLanguage = languageName;
+            this.view.dispatch({ effects: this.language.reconfigure(await language()) });
+        }
     }
 
     async setTheme(themeName: string) {
