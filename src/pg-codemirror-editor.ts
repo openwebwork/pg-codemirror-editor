@@ -19,7 +19,6 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirro
 import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit } from '@codemirror/language';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
-import { lintKeymap } from '@codemirror/lint';
 import { lightTheme } from 'src/light-theme';
 import 'src/pg-codemirror-editor.scss';
 
@@ -71,7 +70,6 @@ export class View {
             ...historyKeymap,
             ...foldKeymap,
             ...completionKeymap,
-            ...lintKeymap,
             indentWithTab
         ]),
         this.theme.of(lightTheme),
