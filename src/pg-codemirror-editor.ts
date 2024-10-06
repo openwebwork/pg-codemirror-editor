@@ -66,7 +66,7 @@ export class View {
         highlightSelectionMatches(),
         keymap.of([
             ...closeBracketsKeymap,
-            ...defaultKeymap,
+            ...defaultKeymap.filter((k) => k.key !== 'Mod-Enter'),
             ...searchKeymap,
             ...historyKeymap,
             ...foldKeymap,
@@ -228,7 +228,7 @@ export class View {
                 directionDiv.append(directionToggle, directionToggleLabel);
                 dom.append(directionDiv);
 
-                return { dom };
+                return { dom, top: true };
             })
         );
 
@@ -287,5 +287,14 @@ export class View {
                 effects: this.keyMap.reconfigure(typeof keyMap === 'function' ? await keyMap() : keyMap)
             });
         }
+    }
+
+    refresh(key: string) {
+        this.view.requestMeasure({
+            read() {
+                // ignore
+            },
+            key
+        });
     }
 }

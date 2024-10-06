@@ -5,9 +5,17 @@ h1 {
 .pg-codemirror-editor {
     border: 1px solid black;
     min-height: 400px;
+    height: 600px;
+    overflow: auto;
     resize: vertical;
 }
 
+.pg-codemirror-editor .cm-editor,
+.pg-codemirror-editor .cm-editor .cm-scroller {
+    height: 100%;
+}
+
 .pg-codemirror-editor .cm-editor .cm-scroller .cm-content {
+    height: 100%;
     min-height: 400px;
 }
