@@ -1,4 +1,4 @@
-import type { Extension } from '@codemirror/state';
+import type { Extension, StateCommand, Transaction } from '@codemirror/state';
 import { EditorState, Compartment } from '@codemirror/state';
 import type { Panel } from '@codemirror/view';
 import {
@@ -15,10 +15,19 @@ import {
     rectangularSelection,
     showPanel
 } from '@codemirror/view';
-import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit } from '@codemirror/language';
+import {
+    CommentTokens,
+    defaultKeymap,
+    history,
+    historyKeymap,
+    indentWithTab,
+    toggleLineComment,
+    toggleBlockCommentByLine
+} from '@codemirror/commands';
+import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit, syntaxTree } from '@codemirror/language';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
+import type { SyntaxNode } from '@lezer/common';
 import { lightTheme } from 'src/light-theme';
 import 'src/pg-codemirror-editor.scss';
 
@@ -28,6 +37,51 @@ export interface InitializationOptions {
     theme?: string;
     keyMap?: string;
 }
+
+// FIXME: This is highly innefficient. It scans to the the top of the document almost every time.
+const inDescriptionBlock = (state: EditorState, currentPos: number) => {
+    let line;
+    for (let pos = currentPos - 1; pos > 0; pos = line.from - 1) {
+        line = state.doc.lineAt(pos);
+        if (/^\s*#{0,2}\s*ENDDESCRIPTION/.test(line.text)) return false;
+        if (/^\s*#{0,2}\s*DESCRIPTION/.test(line.text)) return true;
+    }
+    return false;
+};
+
+const inLatexImageBlock = (state: EditorState, currentPos: number) => {
+    let inHeredoc = false;
+    for (let pos: SyntaxNode | null = syntaxTree(state).resolveInner(currentPos, 1); pos; pos = pos.parent) {
+        if (pos.name === 'HeredocEndIdentifier') break;
+        if (pos.name === 'InterpolatedHeredocBody') inHeredoc = true;
+        if (pos.name === 'LaTeXImageCode') return inHeredoc;
+        if (pos.type.isTop) break;
+    }
+    return false;
+};
+
+const toggleComment: StateCommand = (target: { state: EditorState; dispatch: (transaction: Transaction) => void }) => {
+    const line = target.state.doc.lineAt(target.state.selection.main.from);
+    const data: readonly CommentTokens[] = target.state.languageDataAt('commentTokens', line.from);
+    const config = data.length ? data[0] : {};
+
+    if (config.line) {
+        if (
+            RegExp(
+                '^\\s*#{0,2}\\s*(DESCRIPTION|KEYWORDS|DBsubject|DBchapter|DBsection|Date|Author|Institution' +
+                    '|MO|Static|TitleText|EditionText|AuthorText|Section|Problem|Language|Level)'
+            ).test(line.text) ||
+            inDescriptionBlock(target.state, line.from)
+        )
+            config.line = '##';
+        else if (inLatexImageBlock(target.state, target.state.selection.main.from)) config.line = '%';
+        else config.line = '#';
+    }
+
+    // Note that config.line will not be set in a PGML or PG text block.  The config.block setting will be used in a
+    // PGML block, and PG text blocks don't have comments.
+    return config.line ? toggleLineComment(target) : config.block ? toggleBlockCommentByLine(target) : false;
+};
 
 export class View {
     private static instanceCount = 0;
@@ -66,6 +120,7 @@ export class View {
         highlightSelectionMatches(),
         keymap.of([
             ...closeBracketsKeymap,
+            { key: 'Mod-/', run: toggleComment },
             ...defaultKeymap.filter((k) => k.key !== 'Mod-Enter'),
             ...searchKeymap,
             ...historyKeymap,

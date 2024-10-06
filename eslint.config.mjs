@@ -49,7 +49,7 @@ export default [
                 'error',
                 { named: 'never', anonymous: 'never', asyncArrow: 'ignore' }
             ],
-            '@stylistic/space-in-parens': ['error', 'never'],
+            //'@stylistic/space-in-parens': ['error', 'never'],
             '@stylistic/space-infix-ops': ['error'],
 
             'no-void': 'off',
