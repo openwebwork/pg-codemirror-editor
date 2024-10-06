@@ -45,6 +45,7 @@ export class View {
     private extensions = [
         this.keyMap.of([]),
         lineNumbers(),
+        EditorView.lineWrapping,
         highlightActiveLineGutter(),
         highlightSpecialChars(),
         history(),
