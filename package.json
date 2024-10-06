@@ -23,6 +23,7 @@
     ],
     "dependencies": {
         "@codemirror/lang-html": "^6.4.9",
+        "@codemirror/lang-xml": "^6.1.0",
         "@codemirror/theme-one-dark": "^6.1.2",
         "@replit/codemirror-emacs": "^6.1.0",
         "@replit/codemirror-vim": "^6.2.1",

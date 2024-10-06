@@ -79,7 +79,8 @@ export class View {
     private currentLanguage = 'pg';
     private languages = new Map<string, () => Promise<Extension>>([
         ['pg', async () => (await import(/* webpackChunkName: 'pg' */ 'codemirror-lang-pg')).pg()],
-        ['html', async () => (await import(/* webpackChunkName: 'html' */ '@codemirror/lang-html')).html()]
+        ['html', async () => (await import(/* webpackChunkName: 'html' */ '@codemirror/lang-html')).html()],
+        ['xml', async () => (await import(/* webpackChunkName: 'xml' */ '@codemirror/lang-xml')).xml()]
     ]);
 
     private currentKeyMap = 'Default';
