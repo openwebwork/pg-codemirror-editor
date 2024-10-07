@@ -38,7 +38,7 @@ export interface InitializationOptions {
     keyMap?: string;
 }
 
-// FIXME: This is highly innefficient. It scans to the the top of the document almost every time.
+// FIXME: This is highly inefficient. It scans to the top of the document every time toggleComment is called.
 const inDescriptionBlock = (state: EditorState, currentPos: number) => {
     let line;
     for (let pos = currentPos - 1; pos > 0; pos = line.from - 1) {
@@ -301,7 +301,7 @@ export class View {
                 directionDiv.append(directionToggle, directionToggleLabel);
                 dom.append(directionDiv);
 
-                return { dom, top: true };
+                return { dom };
             })
         );
 
