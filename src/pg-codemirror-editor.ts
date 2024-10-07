@@ -141,6 +141,11 @@ export class View {
             ...completionKeymap,
             indentWithTab
         ]),
+        EditorView.domEventHandlers({
+            scroll: () => {
+                this.refresh('scroll-update');
+            }
+        }),
         this.theme.of(lightTheme),
         this.language.of([])
     ];
