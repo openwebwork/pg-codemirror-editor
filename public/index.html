@@ -15,11 +15,22 @@
             <h1>PG CodeMirror Editor Playground</h1>
             <div class="input-group mb-3">
                 <button class="btn btn-primary" id="load-file" type="button">Load File</button>
-                <input type="file" name="problem-file" class="form-control" accept="*">
+                <input type="file" name="problem-file" class="form-control">
                 <button class="btn btn-primary" id="get-source" type="button">Download Source</button>
             </div>
             <input type="hidden" name="editor-source">
             <div class="pg-codemirror-editor"></div>
+            <div class="row mt-3">
+                <label for="select-language" class="col-form-label col-2">Language:</label>
+                <div class="col-10">
+                    <select id="select-language" name="select-language" class="form-select">
+                        <option value="pg" selected>pg</option>
+                        <option value="perl">perl</option>
+                        <option value="html">html</option>
+                        <option value="xml">xml</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </body>
 </html>

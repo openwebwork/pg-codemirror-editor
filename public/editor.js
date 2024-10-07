@@ -18,6 +18,11 @@ if (codeMirrorElt instanceof HTMLElement) {
         }
     });
 
+    const languageSelector = document.getElementById('select-language');
+    languageSelector?.addEventListener('change', () => {
+        pgEditor.setLanguage(languageSelector.value);
+    });
+
     document.getElementById('get-source')?.addEventListener('click', () => {
         const element = document.createElement('a');
         element.href = `data:text/plain;charset=utf-8,${encodeURIComponent(pgEditor.source)}`;
