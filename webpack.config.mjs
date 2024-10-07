@@ -22,7 +22,9 @@ export default (_env, argv) => {
             alias: { src: path.resolve(import.meta.dirname, 'src') },
             symlinks: false
         },
-        snapshot: { managedPaths: [/^(.+?[\\/]node_modules[\\/](?!(codemirror-lang-pg))(@.+?[\\/])?.+?)[\\/]/] },
+        snapshot: {
+            managedPaths: [/^(.+?[\\/]node_modules[\\/](?!(@openwebwork[\\/]codemirror-lang-pg))(@.+?[\\/])?.+?)[\\/]/]
+        },
         module: {
             rules: [
                 { test: /\.js$/, exclude: /node_modules/ },
