@@ -267,6 +267,23 @@ export class View {
                 keyMapDiv.append(keyMapLabel, this.keyMapSelect);
                 dom.append(keyMapDiv);
 
+                const spellDiv = document.createElement('div');
+                spellDiv.classList.add('pg-cm-toolbar-item');
+                const spellToggle = document.createElement('input');
+                spellToggle.name = 'pg-cm-spell-toggle';
+                spellToggle.type = 'checkbox';
+                spellToggle.id = `pg-cm-spell-toggle-${this.instance.toString()}`;
+                const spellToggleLabel = document.createElement('label');
+                spellToggleLabel.setAttribute('for', spellToggle.id);
+                spellToggleLabel.textContent = 'Enable Spell Checking';
+                spellToggle.addEventListener('change', () => {
+                    const content = view.dom.querySelector('.cm-content');
+                    content?.setAttribute('spellcheck', spellToggle.checked ? 'true' : 'false');
+                    (content as HTMLElement).focus();
+                });
+                spellDiv.append(spellToggle, spellToggleLabel);
+                dom.append(spellDiv);
+
                 const directionDiv = document.createElement('div');
                 directionDiv.classList.add('pg-cm-toolbar-item');
                 const directionToggle = document.createElement('input');
@@ -275,7 +292,7 @@ export class View {
                 directionToggle.id = `pg-cm-direction-toggle-${this.instance.toString()}`;
                 const directionToggleLabel = document.createElement('label');
                 directionToggleLabel.setAttribute('for', directionToggle.id);
-                directionToggleLabel.textContent = 'Force editor to RTL';
+                directionToggleLabel.textContent = 'Force RTL';
                 directionToggle.addEventListener('change', () => {
                     const scroller = view.dom.querySelector('.cm-scroller');
                     if (!scroller) return;
