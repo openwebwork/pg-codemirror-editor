@@ -19,11 +19,7 @@ export default (_env, argv) => {
             modules: ['node_modules'],
             extensions: ['.ts', '.js'],
             mainFields: ['browser', 'module', 'main'],
-            alias: { src: path.resolve(import.meta.dirname, 'src') },
-            symlinks: false
-        },
-        snapshot: {
-            managedPaths: [/^(.+?[\\/]node_modules[\\/](?!(@openwebwork[\\/]codemirror-lang-pg))(@.+?[\\/])?.+?)[\\/]/]
+            alias: { src: path.resolve(import.meta.dirname, 'src') }
         },
         module: {
             rules: [
