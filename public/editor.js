@@ -4,7 +4,11 @@ const codeMirrorElt = document.querySelector('.pg-codemirror-editor');
 
 if (codeMirrorElt instanceof HTMLElement) {
     const sourceInput = document.getElementsByName('editor-source')[0];
-    const pgEditor = new PGCodeMirrorEditor.View(codeMirrorElt, { source: sourceInput.value });
+    const languageSelector = document.getElementById('select-language');
+    const pgEditor = new PGCodeMirrorEditor.View(codeMirrorElt, {
+        source: sourceInput.value,
+        language: languageSelector?.value ?? 'pg'
+    });
 
     document.getElementById('load-file')?.addEventListener('click', () => {
         const file = document.getElementsByName('problem-file')[0]?.files?.[0];
@@ -18,7 +22,6 @@ if (codeMirrorElt instanceof HTMLElement) {
         }
     });
 
-    const languageSelector = document.getElementById('select-language');
     languageSelector?.addEventListener('change', () => {
         pgEditor.setLanguage(languageSelector.value);
     });
