@@ -1,6 +1,6 @@
 {
     "name": "@openwebwork/pg-codemirror-editor",
-    "version": "0.0.1-beta.6",
+    "version": "0.0.1-beta.7",
     "description": "PG CodeMirror Editor",
     "author": "The WeBWorK Project",
     "license": "MIT",

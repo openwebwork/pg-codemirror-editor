@@ -24,17 +24,7 @@ import {
     toggleLineComment,
     toggleBlockCommentByLine
 } from '@codemirror/commands';
-import {
-    bracketMatching,
-    foldGutter,
-    foldCode,
-    unfoldCode,
-    foldAll,
-    unfoldAll,
-    indentOnInput,
-    indentUnit,
-    syntaxTree
-} from '@codemirror/language';
+import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit, syntaxTree } from '@codemirror/language';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import type { SyntaxNode } from '@lezer/common';
@@ -134,10 +124,7 @@ export class View {
             ...defaultKeymap.filter((k) => k.key !== 'Mod-Enter'),
             ...searchKeymap,
             ...historyKeymap,
-            { key: 'Ctrl-Shift-[', mac: 'Cmd-Shift-[', run: foldCode },
-            { key: 'Ctrl-Shift-]', mac: 'Cmd-Shift-]', run: unfoldCode },
-            { key: 'Ctrl-Alt-[', mac: 'Cmd-Alt-[', run: foldAll },
-            { key: 'Ctrl-Alt-]', mac: 'Cmd-Alt-]', run: unfoldAll },
+            ...foldKeymap,
             ...completionKeymap,
             indentWithTab
         ]),
