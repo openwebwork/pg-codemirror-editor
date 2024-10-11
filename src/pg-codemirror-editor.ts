@@ -142,7 +142,12 @@ export class View {
         ['pg', async () => (await import(/* webpackChunkName: 'pg' */ '@openwebwork/codemirror-lang-pg')).pg()],
         ['perl', async () => (await import(/* webpackChunkName: 'perl' */ 'codemirror-lang-perl')).perl()],
         ['html', async () => (await import(/* webpackChunkName: 'html' */ '@codemirror/lang-html')).html()],
-        ['xml', async () => (await import(/* webpackChunkName: 'xml' */ '@codemirror/lang-xml')).xml()]
+        ['xml', async () => (await import(/* webpackChunkName: 'xml' */ '@codemirror/lang-xml')).xml()],
+        ['mt-html', async () => (await import(/* webpackChunkName: 'mt' */ 'codemirror-lang-mt')).mt()],
+        [
+            'mt-text',
+            async () => (await import(/* webpackChunkName: 'mt' */ 'codemirror-lang-mt')).mt({ baseLanguage: null })
+        ]
     ]);
 
     private currentKeyMap = 'Default';
