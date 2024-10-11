@@ -1,6 +1,6 @@
 {
     "name": "@openwebwork/pg-codemirror-editor",
-    "version": "0.0.1-beta.8",
+    "version": "0.0.1-beta.9",
     "description": "PG CodeMirror Editor",
     "author": "The WeBWorK Project",
     "license": "MIT",
@@ -39,7 +39,7 @@
         "cm6-theme-solarized-dark": "^0.2.0",
         "cm6-theme-solarized-light": "^0.2.0",
         "codemirror": "^6.0.1",
-        "codemirror-lang-mt": "^0.0.1",
+        "codemirror-lang-mt": "^0.0.2-beta.1",
         "codemirror-lang-perl": "^0.1.5-beta.1",
         "thememirror": "^2.0.1"
     },
