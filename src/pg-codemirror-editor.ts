@@ -330,14 +330,18 @@ export class View {
     }
 
     set source(doc: string) {
-        this.view.setState(EditorState.create({ doc, extensions: this.extensions }));
-        void this.setLanguage(this.currentLanguage);
-        void this.setTheme(this.currentTheme);
-        void this.setKeyMap(this.currentKeyMap);
+        this.view.dispatch({ changes: { from: 0, to: this.view.state.doc.length, insert: doc } });
     }
 
     get source() {
         return this.view.state.doc.toString();
+    }
+
+    newSource(doc: string) {
+        this.view.setState(EditorState.create({ doc, extensions: this.extensions }));
+        void this.setLanguage(this.currentLanguage);
+        void this.setTheme(this.currentTheme);
+        void this.setKeyMap(this.currentKeyMap);
     }
 
     async setLanguage(languageName: string) {

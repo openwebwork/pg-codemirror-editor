@@ -68,8 +68,14 @@ The options are described below.
 
 ### `source: string`
 
-Set the source code to be edited with the `source` getter, and get the current source with the `source` setter. Note
-that setting the source will reset the editor state (including undo and redo history).
+Get the source code to be edited with the `source` getter, and set the current source with the `source` setter. Note
+that setting the source will only update the code shown with the new contents, and the editor state will be maintained
+(including undo and redo history). If the intent is to reset the state with a new document use the `newSource` method
+instead.
+
+### `newSource(doc: string): void`
+
+Set the source code to be edited in the editor. This resets the editor state, and loads the new code.
 
 ### `setLanguage(languageName: string): Promise<void>`
 

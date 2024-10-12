@@ -17,7 +17,7 @@ if (codeMirrorElt instanceof HTMLElement) {
             reader.readAsText(file);
             reader.addEventListener('load', () => {
                 sourceInput.value = reader.result;
-                pgEditor.source = sourceInput.value;
+                pgEditor.newSource(sourceInput.value);
             });
         }
     });
