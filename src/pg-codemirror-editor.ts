@@ -28,7 +28,9 @@ import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit, syn
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import type { SyntaxNode } from '@lezer/common';
-import { lightTheme } from 'src/light-theme';
+import { highlightCode } from '@lezer/highlight';
+import { StyleModule } from 'style-mod';
+import { lightHighlightStyle, lightTheme } from 'src/light-theme';
 import 'src/pg-codemirror-editor.scss';
 
 export interface InitializationOptions {
@@ -385,3 +387,31 @@ export class View {
         });
     }
 }
+
+export const runMode = async (source: string, container: HTMLElement) => {
+    const pgLanguage = (await import(/* webpackChunkName: 'pg' */ '@openwebwork/codemirror-lang-pg')).pgLanguage;
+
+    if (lightHighlightStyle.module) StyleModule.mount(document, lightHighlightStyle.module);
+
+    while (container.firstChild) container.firstChild.remove();
+
+    highlightCode(
+        source,
+        pgLanguage.parser.parse(source),
+        lightHighlightStyle,
+        (text: string, classes: string) => {
+            let node: Text | HTMLElement = document.createTextNode(text);
+            if (classes) {
+                const span = document.createElement('span');
+                span.appendChild(node);
+                span.className = classes;
+                container.appendChild(span);
+                node = span;
+            }
+            container.appendChild(node);
+        },
+        () => {
+            container.appendChild(document.createTextNode('\n'));
+        }
+    );
+};
