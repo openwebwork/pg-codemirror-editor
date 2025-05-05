@@ -285,12 +285,14 @@ export class View {
                 spellToggle.name = 'pg-cm-spell-toggle';
                 spellToggle.type = 'checkbox';
                 spellToggle.id = `pg-cm-spell-toggle-${this.instance.toString()}`;
+                if (localStorage.getItem('pg-cm-editor.spell-check') === 'true') spellToggle.checked = true;
                 const spellToggleLabel = document.createElement('label');
                 spellToggleLabel.setAttribute('for', spellToggle.id);
                 spellToggleLabel.textContent = 'Enable Spell Checking';
                 spellToggle.addEventListener('change', () => {
                     const content = view.dom.querySelector('.cm-content');
                     content?.setAttribute('spellcheck', spellToggle.checked ? 'true' : 'false');
+                    localStorage.setItem('pg-cm-editor.spell-check', spellToggle.checked ? 'true' : 'false');
                     (content as HTMLElement).focus();
                 });
                 spellDiv.append(spellToggle, spellToggleLabel);
