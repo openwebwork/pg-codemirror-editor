@@ -93,6 +93,7 @@ export class View {
 
     private keyMapSelect?: HTMLSelectElement;
     private themeSelect?: HTMLSelectElement;
+    private spellToggle?: HTMLInputElement;
 
     private keyMap = new Compartment();
     private theme = new Compartment();
@@ -281,21 +282,21 @@ export class View {
 
                 const spellDiv = document.createElement('div');
                 spellDiv.classList.add('pg-cm-toolbar-item');
-                const spellToggle = document.createElement('input');
-                spellToggle.name = 'pg-cm-spell-toggle';
-                spellToggle.type = 'checkbox';
-                spellToggle.id = `pg-cm-spell-toggle-${this.instance.toString()}`;
-                if (localStorage.getItem('pg-cm-editor.spell-check') === 'true') spellToggle.checked = true;
+                this.spellToggle = document.createElement('input');
+                this.spellToggle.name = 'pg-cm-spell-toggle';
+                this.spellToggle.type = 'checkbox';
+                this.spellToggle.id = `pg-cm-spell-toggle-${this.instance.toString()}`;
+                if (localStorage.getItem('pg-cm-editor.spell-check') === 'true') this.spellToggle.checked = true;
                 const spellToggleLabel = document.createElement('label');
-                spellToggleLabel.setAttribute('for', spellToggle.id);
+                spellToggleLabel.setAttribute('for', this.spellToggle.id);
                 spellToggleLabel.textContent = 'Enable Spell Checking';
-                spellToggle.addEventListener('change', () => {
+                this.spellToggle.addEventListener('change', () => {
                     const content = view.dom.querySelector('.cm-content');
-                    content?.setAttribute('spellcheck', spellToggle.checked ? 'true' : 'false');
-                    localStorage.setItem('pg-cm-editor.spell-check', spellToggle.checked ? 'true' : 'false');
+                    content?.setAttribute('spellcheck', this.spellToggle?.checked ? 'true' : 'false');
+                    localStorage.setItem('pg-cm-editor.spell-check', this.spellToggle?.checked ? 'true' : 'false');
                     (content as HTMLElement).focus();
                 });
-                spellDiv.append(spellToggle, spellToggleLabel);
+                spellDiv.append(this.spellToggle, spellToggleLabel);
                 dom.append(spellDiv);
 
                 const directionDiv = document.createElement('div');
@@ -331,6 +332,8 @@ export class View {
         if (selectedKeyMap !== 'Default') void this.setKeyMap(selectedKeyMap);
         const selectedTheme = localStorage.getItem('pg-cm-editor.theme') ?? options?.theme ?? 'Default';
         if (selectedTheme !== 'Default') void this.setTheme(selectedTheme);
+
+        if (this.spellToggle?.checked) this.spellToggle.dispatchEvent(new Event('change'));
     }
 
     set source(doc: string) {
