@@ -1,6 +1,6 @@
 {
     "name": "@openwebwork/pg-codemirror-editor",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "PG CodeMirror Editor",
     "author": "The WeBWorK Project",
     "license": "MIT",
@@ -27,7 +27,7 @@
         "@codemirror/lang-html": "^6.4.9",
         "@codemirror/lang-xml": "^6.1.0",
         "@codemirror/theme-one-dark": "^6.1.2",
-        "@openwebwork/codemirror-lang-pg": "^0.0.2",
+        "@openwebwork/codemirror-lang-pg": "^0.0.3",
         "@replit/codemirror-emacs": "^6.1.0",
         "@replit/codemirror-vim": "^6.3.0",
         "cm6-theme-basic-dark": "^0.2.0",
@@ -39,8 +39,8 @@
         "cm6-theme-solarized-dark": "^0.2.0",
         "cm6-theme-solarized-light": "^0.2.0",
         "codemirror": "^6.0.1",
-        "codemirror-lang-mt": "^0.0.2",
-        "codemirror-lang-perl": "^0.1.5",
+        "codemirror-lang-mt": "^0.0.3",
+        "codemirror-lang-perl": "^0.1.6",
         "style-mod": "^4.1.2",
         "thememirror": "^2.0.1"
     },
